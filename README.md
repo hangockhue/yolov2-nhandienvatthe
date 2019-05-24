@@ -15,6 +15,8 @@ như sau
 
 - (m, pro_image_height, pro_image_width, 5, 85) ở đây pro_image là 19x19 vì đang sử dụng grid 19, 5 đại diện cho số lượng anchors box, 85 sẽ đại diện cho 80 class và (Px, bx, by, bh, bw)
 
+![alt_text](/image/Capture.PNG)
+
 ## Quá trình xử lý
 
 ### Tìm class được phát hiện bởi anchors
