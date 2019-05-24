@@ -2,7 +2,7 @@
 
 ## Dataset 
 
-- Chương trình sẽ sử dụng bộ dữ liệu COCO dataset.
+- Chương trình sẽ sử dụng bộ dữ liệu COCO dataset. Download tại [đây](https://github.com/OlafenwaMoses/ImageAI/releases/download/1.0/yolo.h5).
 
 - Đầu vào sẽ là một vector 4 chiều (m, image_height, image_width, 3)
 Với m là mini-batch size, image_height và image_width là kích thước của hình ảnh, 3 chính là số kênh màu. Ở đây là 3 kênh tương ứng với ảnh màu RGB.
