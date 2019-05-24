@@ -14,3 +14,8 @@ Với m là mini-batch size, image_height và image_width là kích thước c�
 như sau
 
 - (m, pro_image_height, pro_image_width, 5, 85) ở đây pro_image là 19x19 vì đang sử dụng grid 19, 5 đại diện cho số lượng anchors box, 85 sẽ đại diện cho 80 class và (Px, bx, by, bh, bw)
+
+## Quá trình xử lý
+
+### Tìm class được phát hiện bởi anchors
+- Vì có 80 lớp nên phải tìm class nào được phát hiện bởi anchors box . Chúng ta cần nhân số điểm xác xuất với xác xuất lớp được xuất ra khỏi mạng. Bước lọc sẽ loại bỏ những box classes scores dưới một ngưỡng nhất định ở đây là 0.6
