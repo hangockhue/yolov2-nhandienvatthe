@@ -20,4 +20,15 @@ như sau
 ## Quá trình xử lý
 
 ### Tìm class được phát hiện bởi anchors
+
 - Vì có 80 lớp nên phải tìm class nào được phát hiện bởi anchors box . Chúng ta cần nhân số điểm xác xuất với xác xuất lớp được xuất ra khỏi mạng. Bước lọc sẽ loại bỏ những box classes scores dưới một ngưỡng nhất định ở đây là 0.6
+
+- Hàm xử lý ở đây là yolo_filter_boxes(). Đầu vào của hàm là:
+  - box_confidence là một tensor chứa xác xuất của một đối tượng (19x19,5,1)
+  - boxes là tensor chứa thông số box (bx,by,bw,bh) (19x19,5,4)
+  - box_class_probs là tensor chứa xác xuất phát hiện của 80 lớp
+  Ta sẽ nhân xác suất của đối tượng với xác suất của 80 lớp để tìm xác suất lớp nào là cao nhất, ngưỡng để xét ở đây là 0.6
+
+- Sau đó qua hàm yolo_eval để sắp xếp lại để thể hiện vật thể trên hình góc, vì lúc ban đầu hình đã được resize trở thành 608x608 để xử lý.
+
+- Trước khi đưa vào hàm yolo_head() dùng để chuyển đổi output của mô hình 
