@@ -31,4 +31,4 @@ như sau
 
 - Sau đó qua hàm yolo_eval để sắp xếp lại để thể hiện vật thể trên hình góc, vì lúc ban đầu hình đã được resize trở thành 608x608 để xử lý.
 
-- Trước khi đưa vào hàm yolo_head() dùng để chuyển đổi output của mô hình 
+- Trước khi đưa vào hàm yolo_head() dùng để chuyển đổi output của mô hình thành dạng có thể xử lý ở hàm tiếp theo
