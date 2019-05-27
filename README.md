@@ -31,4 +31,8 @@ như sau
 
 - Sau đó qua hàm yolo_eval để sắp xếp lại để thể hiện vật thể trên hình góc, vì lúc ban đầu hình đã được resize trở thành 608x608 để xử lý.
 
-- Trước khi đưa vào hàm yolo_head() dùng để chuyển đổi output của mô hình thành dạng có thể xử lý ở hàm tiếp theo
+- Trước khi đưa vào hàm yolo_head() dùng để chuyển đổi output của mô hình thành dạng có thể xử lý ở hàm ở hàm yolo_filter_box()
+
+### Ý nghĩa một số hàm tensor
+
+- tf.boolean_mask(a,b) với a là một mảng và b là một mảng True False với output sẽ là những giá trị True của a được so sánh với b. VD : a = [1,2,3,4], b = [True,False,True,False], => output = [1,3]
