@@ -58,12 +58,12 @@ def yolo_eval(yolo_outputs,image_shape, max_boxes=10, score_threshold=.6, iou_th
     image_dims = K.stack([height, width, height, width]) # xếp chồng
     image_dims = K.reshape(image_dims, [1, 4])
     boxes = boxes * image_dims
-
+    # non max suppression : xử lý giúp boxes không bị chồng chéo
     max_boxes_tensor = K.variable(max_boxes, dtype='int32')
     K.get_session().run(tf.variables_initializer([max_boxes_tensor]))
     nms_index = tf.image.non_max_suppression(
         boxes, scores, max_boxes_tensor, iou_threshold=iou_threshold)
-    boxes = K.gather(boxes, nms_index)
+    boxes = K.gather(boxes, nms_index) # K.gather để chọn nms index từ boxes
     scores = K.gather(scores, nms_index)
     classes = K.gather(classes, nms_index)
     
@@ -75,7 +75,7 @@ def yolo_head(feats, anchors, num_classes):
 
     anchors_tensor = K.reshape(K.variable(anchors), [1,1,1, num_anchors, 2])
 
-    conv_dims = K.shape(feats)[1:3] # kích thước lớp tích chập 19x5
+    conv_dims = K.shape(feats)[1:3] # 19x19
 
     conv_height_index = K.arange(0, stop=conv_dims[0])
     conv_width_index = K.arange(0, stop=conv_dims[1])
@@ -92,13 +92,11 @@ def yolo_head(feats, anchors, num_classes):
         feats, [-1, conv_dims[0], conv_dims[1], num_anchors, num_classes + 5])
     conv_dims = K.cast(K.reshape(conv_dims, [1, 1, 1, 1, 2]), K.dtype(feats))
 
-    box_xy = K.sigmoid(feats[..., :2])
-    box_wh = K.exp(feats[..., 2:4])
-    box_confidence = K.sigmoid(feats[..., 4:5])
-    box_class_probs = K.softmax(feats[..., 5:])
+    box_xy = K.sigmoid(feats[..., :2]) # nén giá trị chạy từ 0 -> 1
+    box_wh = K.exp(feats[..., 2:4]) # hàm e mũ x 
+    box_confidence = K.sigmoid(feats[..., 4:5]) # nén giá trị chạy từ 0 -> 1
+    box_class_probs = K.softmax(feats[..., 5:]) # hàm trung bình mũ 
 
-    # Adjust preditions to each spatial grid point and anchor size.
-    # Note: YOLO iterates over height index before width index.
     box_xy = (box_xy + conv_index) / conv_dims
     box_wh = box_wh * anchors_tensor / conv_dims
 
@@ -137,8 +135,8 @@ sess = K.get_session()
 model_image_size = yolo_model.layers[0].input_shape[1:3]
 is_fixed_size = model_image_size != (None, None)
 
-# Generate output tensor targets for filtered bounding boxes.
-# TODO: Wrap these backend operations with Keras layers.
+# Đưa ra những output tensor cho việc lọc các boxes
+# Bọc các lớp xử lý tính toán bằng keras layer
 yolo_outputs = yolo_head(yolo_model.output, anchors, len(class_names))
 input_image_shape = K.placeholder(shape=(2, ))
 boxes, scores, classes = yolo_eval(
@@ -149,7 +147,7 @@ boxes, scores, classes = yolo_eval(
 
 image = Image.open(image_file)
 
-if is_fixed_size:  # TODO: When resizing we can use minibatch input.
+if is_fixed_size: 
     resized_image = image.resize(
             tuple(reversed(model_image_size)), Image.BICUBIC)
             # Image.BICUBIC các pixel sau khi resize sẽ tựng động phân bố để có kích thước tốt nhất
@@ -176,13 +174,11 @@ out_boxes, out_scores, out_classes = sess.run(
             input_image_shape: [image.size[1], image.size[0]],
             K.learning_phase(): 0
         })
-print('Found {} boxes for {}'.format(len(out_boxes), image_file))
+print('Tìm được {} vật thể ở hình {}'.format(len(out_boxes), image_file))
 
 font = ImageFont.truetype(
         font='FiraMono-Medium.otf',
         size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
-thickness = (image.size[0] + image.size[1]) // 300
-
 for i, c in reversed(list(enumerate(out_classes))):
     predicted_class = class_names[c]
     box = out_boxes[i]
@@ -204,11 +200,9 @@ for i, c in reversed(list(enumerate(out_classes))):
         text_origin = np.array([left, top - label_size[1]])
     else:
         text_origin = np.array([left, top + 1])
-
-        # My kingdom for a good redistributable image drawing library.
-    for i in range(thickness):
-        draw.rectangle(
-                [left + i, top + i, right - i, bottom - i],
+    
+    draw.rectangle(
+                [left , top , right , bottom], width= 4,
                 outline=colors[c])
     draw.rectangle(
             [tuple(text_origin), tuple(text_origin + label_size)],
